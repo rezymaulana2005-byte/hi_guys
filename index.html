@@ -6,67 +6,67 @@
     <title>Admin Control | Generator</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;800&display=swap');
+    :root { --bg: #121212; --txt: #e0e0e0; --accent: #00ff88; --card: #1e1e1e; }
 
-        :root { --bg: #121212; --txt: #e0e0e0; --accent: #00ff88; --card: #1e1e1e; }
+    body {
+        background: var(--bg); color: var(--txt); font-family: 'Poppins', sans-serif;
+        margin: 0; min-height: 100vh; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; padding: 20px;
+    }
 
-        body {
-            background: var(--bg); color: var(--txt); font-family: 'Poppins', sans-serif;
-            margin: 0; min-height: 100vh; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; padding: 20px;
-        }
+    h1 { color: var(--accent); margin-bottom: 10px; }
+    p { color: #888; margin-bottom: 30px; }
 
-        h1 { color: var(--accent); margin-bottom: 10px; }
-        p { color: #888; margin-bottom: 30px; }
+    .box {
+        background: var(--card); padding: 30px; border-radius: 15px;
+        border: 1px solid #333; width: 90%; max-width: 500px; text-align: center;
+    }
 
-        .box {
-            background: var(--card); padding: 30px; border-radius: 15px;
-            border: 1px solid #333; width: 90%; max-width: 500px; text-align: center;
-        }
+    input {
+        width: 80%; padding: 12px; border-radius: 8px; border: 1px solid #333;
+        background: #0f0f0f; color: #fff; margin-bottom: 15px; font-family: inherit;
+    }
 
-        input {
-            width: 80%; padding: 12px; border-radius: 8px; border: 1px solid #333;
-            background: #0f0f0f; color: #fff; margin-bottom: 15px; font-family: inherit;
-        }
+    button {
+        padding: 12px 30px; background: var(--accent); color: #000;
+        border: none; border-radius: 8px; font-weight: 800; cursor: pointer;
+        font-size: 1rem;
+    }
 
-        button {
-            padding: 12px 30px; background: var(--accent); color: #000;
-            border: none; border-radius: 8px; font-weight: 800; cursor: pointer;
-            font-size: 1rem;
-        }
+    .result {
+        margin-top: 20px; padding: 15px; background: #000; border: 1px dashed var(--accent);
+        border-radius: 8px; word-break: break-all; display: none; color: var(--accent);
+    }
+</style>
 
-        .result {
-            margin-top: 20px; padding: 15px; background: #000; border: 1px dashed var(--accent);
-            border-radius: 8px; word-break: break-all; display: none; color: var(--accent);
-        }
-    </style>
 </head>
 <body>
+<h1>Admin Control</h1>
+<p>Link Generator & Visitor Log</p>
 
-    <h1>Admin Control</h1>
-    <p>Link Generator & Visitor Log</p>
+<div class="box">
+    <h3>🔗 Generate New Link</h3>
+    <input type="text" id="noteInput" placeholder="Catatan: Untuk si X...">
+    <button onclick="generate()">Create Link</button>
+    
+    <div class="result" id="resultBox"></div>
+</div>
 
-    <div class="box">
-        <h3>🔗 Generate New Link</h3>
-        <input type="text" id="noteInput" placeholder="Catatan: Untuk si X...">
-        <button onclick="generate()">Create Link</button>
-        
-        <div class="result" id="resultBox"></div>
-    </div>
+<script>
+    const targetFile = "target.html"; // Pastikan nama file target sesuai
 
-    <script>
-        const targetFile = "target.html"; // Pastikan nama file target sesuai
+    function generate() {
+        const note = document.getElementById('noteInput').value;
+        let baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+        let fullUrl = baseUrl + targetFile + (note ? "?note=" + encodeURIComponent(note) : "");
 
-        function generate() {
-            const note = document.getElementById('noteInput').value;
-            let baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-            let fullUrl = baseUrl + targetFile + (note ? "?note=" + encodeURIComponent(note) : "");
+        const res = document.getElementById('resultBox');
+        res.style.display = "block";
+        res.innerText = fullUrl;
 
-            const res = document.getElementById('resultBox');
-            res.style.display = "block";
-            res.innerText = fullUrl;
+        navigator.clipboard.writeText(fullUrl).then(() => alert("✅ Link copied! Kirim ke target."));
+    }
+</script>
 
-            navigator.clipboard.writeText(fullUrl).then(() => alert("✅ Link copied! Kirim ke target."));
-        }
-    </script>
 </body>
 </html>
