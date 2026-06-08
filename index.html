@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control | Link Generator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
+
+        :root { --bg: #0a0a0a; --txt: #fff; --accent: #00ff88; --glass: rgba(255,255,255,0.05); }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg); color: var(--txt); font-family: 'Space Grotesk', sans-serif;
+            min-height: 100vh; padding: 30px;
+        }
+
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { color: var(--accent); font-size: 2.5rem; letter-spacing: -1px; }
+        .header p { color: #666; margin-top: 10px; }
+
+        .gen-box {
+            background: var(--glass); border: 1px solid #333; border-radius: 20px;
+            padding: 30px; max-width: 600px; margin: 0 auto 50px; text-align: center;
+        }
+
+        input {
+            width: 100%; padding: 15px; background: #000; border: 1px solid #333;
+            border-radius: 10px; color: #fff; font-size: 1rem; font-family: inherit;
+            margin-bottom: 15px;
+        }
+
+        button {
+            width: 100%; padding: 15px; background: var(--accent); color: #000;
+            border: none; border-radius: 10px; font-weight: 700; cursor: pointer;
+            font-size: 1rem; transition: 0.2s;
+        }
+
+        .link-result {
+            margin-top: 20px; padding: 15px; background: #000; border: 1px dashed var(--accent);
+            border-radius: 10px; word-break: break-all; display: none; color: var(--accent);
+        }
+
+        .info-box {
+            max-width: 600px; margin: 0 auto; text-align: center;
+            padding: 20px; background: var(--glass); border: 1px solid #333; border-radius: 20px;
+            color: #888; font-size: 0.9rem;
+        }
+
+        .discord-icon { color: #5865F2; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>ADMIN CONTROL</h1>
+        <p>Link Generator</p>
+    </div>
+
+    <div class="gen-box">
+        <h3>🔗 Generate Tracking Link</h3>
+        <p style="color:#666;margin-bottom:15px;font-size:0.9rem;">Masukkan catatan:</p>
+        <input type="text" id="noteInput" placeholder="Contoh: Untuk si Fulan...">
+        <button onclick="generateLink()">GENERATE LINK</button>
+        <div class="link-result" id="resultBox"></div>
+    </div>
+
+    <div class="info-box">
+        <h3 style="color:#fff;margin-bottom:15px;">📋 Cara Cek Visitor</h3>
+        <p>Data visitor masuk ke <span class="discord-icon">Discord Channel</span> tempat webhook dibuat.</p>
+        <p style="margin-top:15px;">Buka channel tersebut untuk melihat siapa yang sudah membuka link!</p>
+    </div>
+
+    <script>
+        const targetFile = "target.html";
+
+        function generateLink() {
+            const note = document.getElementById('noteInput').value;
+            let base = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+            let url = base + targetFile + (note ? "?note=" + encodeURIComponent(note) : "");
+
+            document.getElementById('resultBox').style.display = "block";
+            document.getElementById('resultBox').innerText = url;
+            
+            navigator.clipboard.writeText(url).then(() => alert("Link disalin!"));
+        }
+    </script>
+</body>
+</html>
